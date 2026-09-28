@@ -13,7 +13,10 @@ from google.oauth2 import service_account
 # CONFIG (Populated securely via GitHub Secrets)
 # ═══════════════════════════════════════════════════════════════════════
 
-API_URL       = os.environ.get("API_URL", "").rstrip("/")
+API_URL       = os.environ.get("API_URL", "").strip().rstrip("/")
+if API_URL and not API_URL.startswith(("http://", "https://")):
+    API_URL = f"https://{API_URL}"
+
 API_USERNAME  = os.environ.get("API_USERNAME")
 API_PASSWORD  = os.environ.get("API_PASSWORD")
 GOOGLE_CREDS  = os.environ.get("GOOGLE_CREDS_JSON")
