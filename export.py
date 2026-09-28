@@ -13,7 +13,9 @@ from google.oauth2 import service_account
 # CONFIG (Populated securely via GitHub Secrets)
 # ═══════════════════════════════════════════════════════════════════════
 
-API_URL       = os.environ.get("API_URL", "").strip().rstrip("/")
+# Aggressively strip any accidental brackets, quotes, or spaces from the secret
+API_URL = os.environ.get("API_URL", "").strip("[]\"' \t\n\r").rstrip("/")
+
 if API_URL and not API_URL.startswith(("http://", "https://")):
     API_URL = f"https://{API_URL}"
 
