@@ -1,3 +1,10 @@
+"""
+export.py
+---------
+Pulls fully-calculated data from the Pacific Debt Dashboard API
+and upserts into Google Sheets. Includes 'Payout' calculations.
+"""
+
 import os
 import sys
 import time
@@ -158,6 +165,7 @@ def build_output(df):
     out["UTM_Network"]       = df.get("UtmNetwork", pd.Series("", index=df.index)).fillna("")
     out["UTM_Source"]        = df.get("UtmSource", pd.Series("", index=df.index)).fillna("")
     out["Enrolled By"]       = df["EnrolledBy"].fillna("")
+    
     out["Payout"]            = df["payout"].apply(fmt_currency) 
     out["Servicing Company"] = df["ServicingCompany"].fillna("PDR")
 
@@ -197,8 +205,25 @@ def upsert_to_sheet(client, df, spreadsheet_id, tab_name, columns, campaign_filt
     except Exception:
         pass 
 
-    log.info(f"  Uploading {len(data_to_upload)} rows to '{tab_name}'...")
-    sheet.update(range_name="A1", values=data_to_upload, value_input_option="USER_ENTERED")
+    log.info(f"  Uploading {len(data_to_upload)} rows to '{tab_name}' in chunks...")
+    
+    CHUNK_SIZE = 25000
+    for i in range(0, len(data_to_upload), CHUNK_SIZE):
+        chunk = data_to_upload[i:i + CHUNK_SIZE]
+        start_row = i + 1
+        log.info(f"    -> Writing rows {start_row} to {start_row + len(chunk) - 1}...")
+        
+        for attempt in range(3):
+            try:
+                sheet.update(range_name=f"A{start_row}", values=chunk, value_input_option="USER_ENTERED")
+                time.sleep(2) # Pause briefly to respect API rate limits
+                break
+            except Exception as e:
+                if attempt == 2:
+                    raise e
+                log.warning(f"    Retry {attempt+1} failed, pausing before next try...")
+                time.sleep(5)
+
     log.info(f"  Done writing to '{tab_name}'.")
 
 def main():
