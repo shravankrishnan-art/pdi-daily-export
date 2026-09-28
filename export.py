@@ -59,7 +59,8 @@ VENDOR_CONFIGS = [
         "campaigns":      ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
     },
     {
-        "emails":          "data@ingest.borrowbetter.com",
+        # TEMPORARY TEST EMAIL
+        "emails":          "mikenittoli@pacificdebt.com",
         "campaigns":       ["BorrowBetter"],
         "email_subject":   "BorrowBetter Daily Report",
         "email_filename":  "BorrowBetter Summary Report - {date}.csv"
