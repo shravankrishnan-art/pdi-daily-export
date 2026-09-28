@@ -46,12 +46,12 @@ VENDOR_SHEETS = [
     {
         "spreadsheet_id": "1RoE78ouXLmNUmfoKEhGafrYwivv53qZQCXOA1sBKAaU",
         "tab_name":       "Export",
-        "campaigns":      ["Scale Up Media", "Scale Up Media 2", "Scale Up Media RS"]
+        "campaigns":      ["Scale Up Media", "Scale Up Media 2", "Scale Up Media RS", "Scale Up Media PL", "Scale Up Media RS 2"]
     },
     {
         "spreadsheet_id": "1KocCHX1RCdG6qI_ePKIuzmSRjEy2juWpCsla5rVA3wI",
         "tab_name":       "Export",
-        "campaigns":      ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
+        "campaigns":      ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit - Red States", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
     },
     {
         "spreadsheet_id": "16sleNpG_CCVlwSPianDtl83IJTD2d6xQYXRX010MDgw",
