@@ -2,7 +2,7 @@ name: Daily API to GSheets Export
 
 on:
   schedule:
-    - cron: '0 12 * * *' # Runs daily at 12:00 UTC (16:00 Gulf Standard Time)
+   - cron: '45 11 * * *' # Runs daily at 11:45 UTC (6:45 AM EST)
   workflow_dispatch:     # Allows you to trigger it manually via GitHub UI
 
 jobs:
