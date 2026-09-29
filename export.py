@@ -59,8 +59,9 @@ VENDOR_CONFIGS = [
         "campaigns":      ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
     },
     {
-        # TEMPORARY TEST EMAIL
+        # EMAIL DELIVERY CONFIG
         "emails":          "mikenittoli@pacificdebt.com",
+        "cc_emails":       "mikenittoli@pacificdebt.com, liezlalmin@pacificdebt.com",
         "campaigns":       ["BorrowBetter"],
         "email_subject":   "BorrowBetter Daily Report",
         "email_filename":  "BorrowBetter Summary Report - {date}.csv"
@@ -269,6 +270,13 @@ def email_export(df, config, columns):
     msg['Subject'] = subject_line
     msg['From'] = SMTP_USER
     msg['To'] = recipients
+    
+    # NEW: Apply CC addresses if provided in the config
+    cc_recipients = config.get("cc_emails")
+    if cc_recipients:
+        msg['Cc'] = cc_recipients
+        log.info(f"  CC'ing: {cc_recipients}")
+
     msg.set_content("Hello,\n\nAttached is your automated daily CSV data feed.\n\nBest regards,\nPacific Debt")
 
     csv_data = df.to_csv(index=False)
