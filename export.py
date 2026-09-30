@@ -60,7 +60,7 @@ VENDOR_CONFIGS = [
     },
     {
         # EMAIL DELIVERY CONFIG
-        "emails":          "data@ingest.borrowbetter.com",
+        "emails":          "mikenittoli@pacificdebt.com",
         "cc_emails":       "mikenittoli@pacificdebt.com, liezlalmin@pacificdebt.com",
         "campaigns":       ["BorrowBetter"],
         "email_subject":   "BorrowBetter Daily Report",
@@ -129,7 +129,7 @@ def get_api_data():
 def fmt_currency(val):
     try:
         if val is None or pd.isna(val) or str(val).strip() == "": return ""
-        return f"${float(val):,.2f}"
+        return f"{float(val):.2f}"
     except: return ""
 
 def fmt_date(val):
@@ -148,7 +148,7 @@ def fmt_datetime(val):
 def fmt_contacted(val):
     try:
         if pd.isna(val) or str(val).strip() == "": return ""
-        return "Yes" if int(float(val)) == 1 else "No"
+        return 1 if int(float(val)) == 1 else 0
     except: return ""
 
 def build_output(df):
@@ -271,7 +271,7 @@ def email_export(df, config, columns):
     msg['From'] = SMTP_USER
     msg['To'] = recipients
     
-    # NEW: Apply CC addresses if provided in the config
+    # Apply CC addresses if provided in the config
     cc_recipients = config.get("cc_emails")
     if cc_recipients:
         msg['Cc'] = cc_recipients
