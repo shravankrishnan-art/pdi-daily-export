@@ -1,30 +1,27 @@
 name: Daily API to GSheets Export
 
 on:
-  schedule:
-    # Runs at 10:30 UTC (6:30 AM EST) to account for GitHub queue and script duration
-    - cron: '30 10 * * *'
-  workflow_dispatch:     # Allows you to trigger it manually via GitHub UI
+  workflow_dispatch:     # Allows Make.com (and you) to trigger it instantly
 
 jobs:
   run-export:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pandas requests gspread google-auth
 
-      - name: Run daily export script
+      - name: Run export script
         env:
           API_URL: ${{ secrets.API_URL }}
           API_USERNAME: ${{ secrets.API_USERNAME }}
@@ -34,5 +31,4 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        run: |
-          python export.py
+        run: python export.py
