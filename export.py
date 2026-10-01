@@ -60,7 +60,7 @@ VENDOR_CONFIGS = [
     },
     {
         # EMAIL DELIVERY CONFIG
-        "emails":          "mikenittoli@pacificdebt.com",
+        "emails":          "data@ingest.borrowbetter.com",
         "cc_emails":       "mikenittoli@pacificdebt.com, liezlalmin@pacificdebt.com",
         "campaigns":       ["BorrowBetter"],
         "email_subject":   "BorrowBetter Daily Report",
