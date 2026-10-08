@@ -54,6 +54,11 @@ VENDOR_CONFIGS = [
         "campaigns":      ["Scale Up Media", "Scale Up Media 2", "Scale Up Media RS"]
     },
     {
+        "spreadsheet_id": "16sleNpG_CCVlwSPianDtl83IJTD2d6xQYXRX010MDgw",
+        "tab_name":       "Export",
+        "campaigns":      ["BorrowBetter"]
+    },
+    {
         "spreadsheet_id": "1KocCHX1RCdG6qI_ePKIuzmSRjEy2juWpCsla5rVA3wI",
         "tab_name":       "Export",
         "campaigns":      ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
