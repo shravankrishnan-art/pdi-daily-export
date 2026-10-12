@@ -70,6 +70,15 @@ VENDOR_CONFIGS = [
         "campaigns":       ["BorrowBetter"],
         "email_subject":   "BorrowBetter Daily Report",
         "email_filename":  "BorrowBetter Summary Report - {date}.csv"
+    },
+    {
+        # EMAIL DELIVERY CONFIG
+        "emails":          "reporting@bearingfruitco.com",
+        "cc_emails":       "mikenittoli@pacificdebt.com, liezlalmin@pacificdebt.com",
+        "campaigns":       ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"],
+        "email_subject":   "BearingFruit Daily Report",
+        "email_filename":  "BearingFruit Summary Report - {date}.csv",
+        "extra_columns":   ["EMAIL", "PHONE"] # Added specific columns for this export only
     }
 ]
 
@@ -182,6 +191,12 @@ def build_output(df):
     out["Enrolled Date"]     = df["EnrolledDate"].apply(fmt_date)
     out["FPCD"]              = df["FPCD"].apply(fmt_date)
     out["Dropped Date"]      = df["DroppedDate"].apply(fmt_date)
+    
+    # --- NEW ADDITIONS FOR EMAIL & PHONE ---
+    out["EMAIL"]             = df.get("EMAIL", pd.Series("", index=df.index)).fillna("")
+    out["PHONE"]             = df.get("PHONE", pd.Series("", index=df.index)).fillna("")
+    # ---------------------------------------
+    
     out["ClickId"]           = df.get("ClickId", pd.Series("", index=df.index)).fillna("")
     out["EFID"]              = df.get("EfId", pd.Series("", index=df.index)).fillna("")
     out["LeadSourceId"]      = df.get("LeadSourceId", pd.Series("", index=df.index)).fillna("")
@@ -193,8 +208,8 @@ def build_output(df):
     out["UTM_Source"]        = df.get("UtmSource", pd.Series("", index=df.index)).fillna("")
     out["Enrolled By"]       = df["EnrolledBy"].fillna("")
     
-    out["Payout"]            = df["payout"].apply(fmt_currency) 
-    out["Servicing Company"] = df["ServicingCompany"].fillna("PDR")
+    out["Payout"]            = df.get("payout", pd.Series("", index=df.index)).apply(fmt_currency) 
+    out["Servicing Company"] = df.get("ServicingCompany", pd.Series("PDR", index=df.index)).fillna("PDR")
 
     out.sort_values(by="Created Date", ascending=False, inplace=True)
     out.fillna("", inplace=True)
@@ -321,13 +336,18 @@ def main():
         upsert_to_sheet(client, output_df, SPREADSHEET_ID, SHEET_TAB_NAME, MASTER_COLUMNS)
 
         for config in VENDOR_CONFIGS:
+            # Dynamically attach extra columns if specified for this config
+            export_columns = MASTER_COLUMNS.copy()
+            if "extra_columns" in config:
+                export_columns.extend(config["extra_columns"])
+
             if "spreadsheet_id" in config:
                 log.info(f"Writing to vendor sheet for {config['campaigns']}...")
-                upsert_to_sheet(client, output_df, config["spreadsheet_id"], config["tab_name"], MASTER_COLUMNS, config["campaigns"])
+                upsert_to_sheet(client, output_df, config["spreadsheet_id"], config["tab_name"], export_columns, config["campaigns"])
             
             if "emails" in config:
                 log.info(f"Sending email export for {config['campaigns']}...")
-                email_export(output_df, config, MASTER_COLUMNS)
+                email_export(output_df, config, export_columns)
 
         log.info(f"Export completed: {datetime.now()}")
 
