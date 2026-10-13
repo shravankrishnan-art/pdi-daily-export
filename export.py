@@ -78,7 +78,7 @@ VENDOR_CONFIGS = [
         "campaigns":       ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"],
         "email_subject":   "BearingFruit Daily Report",
         "email_filename":  "BearingFruit Summary Report - {date}.csv",
-        "extra_columns":   ["EMAIL", "PHONE"] # Added specific columns for this export only
+        "extra_columns":   ["Email", "Phone"] # Correctly capitalized to match the API
     }
 ]
 
@@ -192,10 +192,10 @@ def build_output(df):
     out["FPCD"]              = df["FPCD"].apply(fmt_date)
     out["Dropped Date"]      = df["DroppedDate"].apply(fmt_date)
     
-    # --- NEW ADDITIONS FOR EMAIL & PHONE ---
-    out["EMAIL"]             = df.get("EMAIL", pd.Series("", index=df.index)).fillna("")
-    out["PHONE"]             = df.get("PHONE", pd.Series("", index=df.index)).fillna("")
-    # ---------------------------------------
+    # --- PROPERLY CASED EMAIL & PHONE ---
+    out["Email"]             = df.get("Email", pd.Series("", index=df.index)).fillna("")
+    out["Phone"]             = df.get("Phone", pd.Series("", index=df.index)).fillna("")
+    # ------------------------------------
     
     out["ClickId"]           = df.get("ClickId", pd.Series("", index=df.index)).fillna("")
     out["EFID"]              = df.get("EfId", pd.Series("", index=df.index)).fillna("")
