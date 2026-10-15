@@ -61,7 +61,7 @@ VENDOR_CONFIGS = [
     {
         "spreadsheet_id": "1KocCHX1RCdG6qI_ePKIuzmSRjEy2juWpCsla5rVA3wI",
         "tab_name":       "Export",
-        "campaigns":      ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
+        "campaigns":      ["Bearing Fruit", "Bearing Fruit - Red States", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"]
     },
     {
         # EMAIL DELIVERY CONFIG
@@ -75,7 +75,7 @@ VENDOR_CONFIGS = [
         # EMAIL DELIVERY CONFIG
         "emails":          "reporting@bearingfruitco.com",
         "cc_emails":       "mikenittoli@pacificdebt.com, liezlalmin@pacificdebt.com",
-        "campaigns":       ["Bearing Fruit", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"],
+        "campaigns":       ["Bearing Fruit", "Bearing Fruit - Red States", "Bearing Fruit 2", "Bearing Fruit 4", "Bearing Fruit Aged", "Bearing Fruit SpinWheel", "Bearing Fruit Taboola", "BF3", "BF5", "BF6"],
         "email_subject":   "BearingFruit Daily Report",
         "email_filename":  "BearingFruit Summary Report - {date}.csv",
         "extra_columns":   ["Email", "Phone"] # Correctly capitalized to match the API
