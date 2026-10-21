@@ -3,6 +3,9 @@ export.py
 ---------
 Pulls fully-calculated data from the Pacific Debt Dashboard API.
 Upserts into Google Sheets or emails CSVs directly to partners.
+
+AUTH: sends a dedicated read-only key (EXPORT_API_KEY) as a Bearer token.
+The old username/password login no longer exists on the dashboard.
 """
 
 import os
@@ -26,9 +29,8 @@ API_URL = os.environ.get("API_URL", "").strip("[]\"' \t\n\r").rstrip("/")
 if API_URL and not API_URL.startswith(("http://", "https://")):
     API_URL = f"https://{API_URL}"
 
-API_USERNAME  = os.environ.get("API_USERNAME")
-API_PASSWORD  = os.environ.get("API_PASSWORD")
-GOOGLE_CREDS  = os.environ.get("GOOGLE_CREDS_JSON")
+EXPORT_API_KEY = os.environ.get("EXPORT_API_KEY", "").strip()
+GOOGLE_CREDS   = os.environ.get("GOOGLE_CREDS_JSON")
 
 SMTP_SERVER   = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT     = int(os.environ.get("SMTP_PORT", 465))
@@ -97,43 +99,82 @@ log = logging.getLogger(__name__)
 # API FETCH LOGIC
 # ═══════════════════════════════════════════════════════════════════════
 
+PAGE_SIZE      = 5000
+PAGE_RETRIES   = 4
+PAGE_TIMEOUT_S = 180
+
+
+def fetch_page(page, headers):
+    """Fetch one page of leads. Retries on timeouts / 5xx; stops immediately on 401/403/404."""
+    url = f"{API_URL}/api/leads/search"
+    # Sorting by ContactId keeps page boundaries stable while we page through the table.
+    params = {"pageSize": PAGE_SIZE, "page": page, "sort": "ContactId", "dir": "asc"}
+
+    for attempt in range(1, PAGE_RETRIES + 1):
+        try:
+            resp = requests.get(url, params=params, headers=headers, timeout=PAGE_TIMEOUT_S)
+        except requests.exceptions.RequestException as e:
+            err = f"request error: {e}"
+        else:
+            if resp.status_code in (401, 403):
+                log.error(f"API rejected the export key (HTTP {resp.status_code}). "
+                          "Check the EXPORT_API_KEY GitHub secret matches the Worker secret.")
+                sys.exit(1)
+            if resp.status_code == 404:
+                log.error(f"HTTP 404 from {url}. Check the API_URL secret points at the live Worker host.")
+                sys.exit(1)
+            if resp.ok:
+                try:
+                    return resp.json()
+                except ValueError:
+                    err = f"response was not JSON: {resp.text[:200]!r}"
+            else:
+                err = f"HTTP {resp.status_code}: {resp.text[:200]!r}"
+
+        log.warning(f"  Page {page} attempt {attempt}/{PAGE_RETRIES} failed: {err}")
+        if attempt < PAGE_RETRIES:
+            time.sleep(5 * attempt)
+
+    log.error(f"Page {page} failed after {PAGE_RETRIES} attempts. Aborting so partial data is never published.")
+    sys.exit(1)
+
+
 def get_api_data():
-    if not API_URL or not API_USERNAME or not API_PASSWORD:
-        log.error("API_URL, API_USERNAME, or API_PASSWORD missing from environment.")
+    if not API_URL or not EXPORT_API_KEY:
+        log.error("API_URL or EXPORT_API_KEY missing from environment.")
         sys.exit(1)
 
-    log.info(f"Logging into API at {API_URL}...")
-    login_resp = requests.post(f"{API_URL}/api/auth/login", json={
-        "username": API_USERNAME,
-        "password": API_PASSWORD
-    })
-    
-    if not login_resp.ok:
-        log.error(f"Login failed: {login_resp.text}")
-        sys.exit(1)
-        
-    token = login_resp.json().get("token")
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    log.info("Fetching leads from API...")
+    headers = {"Authorization": f"Bearer {EXPORT_API_KEY}"}
+
+    log.info(f"Fetching leads from {API_URL} ...")
     all_rows = []
     page = 1
     total_pages = 1
-    
+    expected_total = None
+
     while page <= total_pages:
-        resp = requests.get(f"{API_URL}/api/leads/search?pageSize=5000&page={page}", headers=headers)
-        if not resp.ok:
-            log.error(f"Failed to fetch page {page}: {resp.text}")
-            sys.exit(1)
-            
-        data = resp.json()
+        data = fetch_page(page, headers)
         all_rows.extend(data.get("rows", []))
         total_pages = data.get("pages", 1)
-        
+        if expected_total is None:
+            expected_total = data.get("total")
+
         log.info(f"  -> Fetched page {page}/{total_pages} ({len(all_rows)} rows total)")
         page += 1
 
     df = pd.DataFrame(all_rows)
+
+    # Rows can shift between pages if the 30-minute sync lands mid-export, so de-duplicate.
+    if "ContactId" in df.columns:
+        before = len(df)
+        df = df.drop_duplicates(subset="ContactId", keep="first")
+        if len(df) != before:
+            log.info(f"  Removed {before - len(df)} duplicate rows.")
+
+    if expected_total is not None and len(df) < expected_total:
+        log.warning(f"  Expected {expected_total} rows but got {len(df)} "
+                    "(data changed mid-export). Re-run if this gap is large.")
+
     return df
 
 # ═══════════════════════════════════════════════════════════════════════
