@@ -24,8 +24,7 @@ jobs:
       - name: Run export script
         env:
           API_URL: ${{ secrets.API_URL }}
-          API_USERNAME: ${{ secrets.API_USERNAME }}
-          API_PASSWORD: ${{ secrets.API_PASSWORD }}
+          EXPORT_API_KEY: ${{ secrets.EXPORT_API_KEY }}
           GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
           SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
